@@ -4,9 +4,7 @@ local player_hp = '';
 local player_mana = '';
 local rog_combo = 0;
 local Tick = {};
- -- переменная Энергия света паладина --
 local holyPower = UnitPower("player",9);
- -- проверка -- /script print(UnitPower('player',9))
 
 print('Hallo to TheRyuzaki Addon');
 
@@ -185,7 +183,8 @@ function Attack_2() -- Ретрик (bulid 1 Глориан)
 	if (A_IsBuf('Гнев Карателя')) then A_CastForTarget('Молот Гнева'); end
 	if (target_hp <= 20) then A_CastForTarget('Молот Гнева'); end
 	if (holyPower => 3) then A_CastForTarget('Вердикт храмовника'); end
-end
+	end
+
 
 function Attack_3() -- БМ Хант (bulid 1) (by sher)
 	-- ~~~~Макросы~~~~~
@@ -199,3 +198,4 @@ function Attack_3() -- БМ Хант (bulid 1) (by sher)
 	if (A_IsBuf('Охотничий азарт')) then 
 		if (A_IsBuf('Удар зверя', 'pet')) then A_CastForTarget('Чародейский выстрел'); else A_CastForTarget('Залп'); end 
 	end
+end
