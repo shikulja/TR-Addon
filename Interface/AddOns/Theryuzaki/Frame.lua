@@ -5,7 +5,7 @@ local player_mana = '';
 local rog_combo = 0;
 local Tick = {};
 local holyPower = UnitPower('player',9);
-- -- проверка -- /script print(UnitPower('player',9))
+-- проверка -- /script print(UnitPower('player',9))
 
 print('Hallo to TheRyuzaki Addon');
 
