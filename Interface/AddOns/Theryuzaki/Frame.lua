@@ -4,7 +4,7 @@ local player_hp = '';
 local player_mana = '';
 local rog_combo = 0;
 local Tick = {};
-local holyPower = UnitPower("player",9);
+local holyPower = UnitPower('player',9);
 
 print('Hallo to TheRyuzaki Addon');
 
@@ -86,7 +86,7 @@ function ChekData()
 	player_hp = UnitHealth('player') / (UnitHealthMax('player') / 100);
 	player_mana = UnitMana('player') / (UnitManaMax('player') / 100);
 	rog_combo = GetComboPoints('target');
-	holyPower = UnitPower("player",9);
+	holyPower = UnitPower('player',9);
 end
 local Cron = {};
 local tmp_Cron = {};
