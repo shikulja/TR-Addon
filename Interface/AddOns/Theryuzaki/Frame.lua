@@ -88,6 +88,7 @@ function ChekData()
 	player_hp = UnitHealth('player') / (UnitHealthMax('player') / 100);
 	player_mana = UnitMana('player') / (UnitManaMax('player') / 100);
 	rog_combo = GetComboPoints('target');
+	holyPower = UnitPower("player",9);
 end
 local Cron = {};
 local tmp_Cron = {};
