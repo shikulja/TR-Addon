@@ -182,8 +182,8 @@ function Attack_2() -- Ретрик (bulid 1 Глориан)
 	A_CastForTarget('Укор');
 	A_CastForTarget('Гнев Карателя');
 	if (A_IsBuf('Гнев Карателя')) then A_CastForTarget('Молот Гнева'); end
-	if (target_hp <= 20) then A_CastForTarget('Молот Гнева'); end
-	if (holyPower => 3) then A_CastForTarget('Вердикт храмовника'); end
+	--if (target_hp <= 20) then A_CastForTarget('Молот Гнева'); end
+	--if ((UnitPower('player',9)) => 3) then A_CastForTarget('Вердикт храмовника'); end
 	end
 
 
