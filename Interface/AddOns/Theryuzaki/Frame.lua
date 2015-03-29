@@ -15,6 +15,66 @@ function SlashCmdList.TR(msg, editbox)
 	print("I work!");
 end
 
+---------------------
+--Функции заклинаний-
+---------------------
+
+--Кастовать заклинание. Возвращать true если скастовался, false если нет
+function Cast(spell)
+	local usable,mana = IsUsableSpell(spell)
+	
+	if usable and mana == nil then
+		if GetSpellCooldown(spell) == 0 then
+			CastSpellByName(spell)
+			return true;
+		else
+			return false;
+		end
+	else
+		return false;
+	end
+end
+
+--Кастовать заклинание по цели. Возвращать true если скастовался, false если нет
+function CastTarget(spell,target)
+	local usable,mana = IsUsableSpell(spell)
+	
+	if usable and mana == nil then
+		if GetSpellCooldown(spell) == 0 and IsSpellInRange(spell,target) == 1 then
+			CastSpellByName(spell,target)
+			return true;
+		else
+			return false;
+		end
+	else
+		return false;
+	end
+end
+
+-- Функция прерывания (кастует чтобы прервать)
+-- Фокус > Цель
+function Interrupt(spell)
+	if not IsUsableSpell(spell) then return end;
+	
+	if not UnitExists("focus") or not UnitCanAttack("player","focus") then		
+		if UnitCastingInfo("target") and select(9,UnitCastingInfo("target")) == false then
+			if not tableContains(interruptBlacklist[UnitName("target")],UnitCastingInfo("target")) and IsSpellInRange(spell,"target") then Cast(spell) else return end;
+		end
+		
+		if UnitChannelInfo("target") and select(8,UnitChannelInfo("target")) == false then
+			if not tableContains(interruptBlacklist[UnitName("target")],UnitChannelInfo("target")) and IsSpellInRange(spell,"target") then Cast(spell) else return end;
+		end
+	else
+		if UnitCastingInfo("focus") and select(9,UnitCastingInfo("focus")) == false then
+			if not tableContains(interruptBlacklist[UnitName("focus")],UnitCastingInfo("focus")) and IsSpellInRange(spell,"focus") then CastTarget(spell,"focus") else return end;
+		end
+		
+		if UnitChannelInfo("focus") and select(8,UnitChannelInfo("focus")) == false then
+			if not tableContains(interruptBlacklist[UnitName("focus")],UnitChannelInfo("focus")) and IsSpellInRange(spell,"focus") then CastTarget(spell,"focus") else return end;
+		end
+	end
+end
+
 -- Получаем количество стаков баффа --
 function buff_num(buff)
 	local name,_,_,count = UnitBuff("player",buff);
@@ -176,12 +236,16 @@ function Attack_1() -- ФростДК (bulid 1)
 	A_CastForTarget('Вытягивание чумы');
 end
 
-function Attack_2() -- Ретрик (bulid 3 Глориан)
+function Attack_2() -- Ретрик (bulid 4 Глориан)
 	-- ~~~~Макросы~~~~~
 	-- 1. "/script A_Atack(2)" - Макрос для атаки вручную о при нажатии на него.
 	-- 2. "/script AutoCombo(2)" - Макрос включения автоматического режима боя.
 	-- 3. "/script DelTimeout('AutoCombo')" - Макрос для выключение автоматического режима боя.
+	--Необходимые таланты:
+	--Самоотверженный целитель, Смертный приговор.
 	-- ~~~~~~~~~~~~~~~~~
+	Interrupt('Укор');
+	Interrupt('Кулак правосудия'); -- не работает над разбиратся мб атака на дистанции
 	if (target_hp >= 95) and buff_num("Самоотверженный целитель") == 3 then A_CastForTarget('Вспышка света'); end
 	A_CastForTarget('Удар воина Света');
 	A_CastForTarget('Правосудие');
