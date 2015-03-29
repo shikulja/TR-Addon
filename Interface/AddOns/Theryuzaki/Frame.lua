@@ -182,7 +182,7 @@ function Attack_2() -- Ретрик (bulid 3 Глориан)
 	-- 2. "/script AutoCombo(2)" - Макрос включения автоматического режима боя.
 	-- 3. "/script DelTimeout('AutoCombo')" - Макрос для выключение автоматического режима боя.
 	-- ~~~~~~~~~~~~~~~~~
-	if buff_num("Самоотверженный целитель") == 3 then A_CastForTarget('Вспышка света'); end
+	if (target_hp >= 95) and buff_num("Самоотверженный целитель") == 3 then A_CastForTarget('Вспышка света'); end
 	A_CastForTarget('Удар воина Света');
 	A_CastForTarget('Правосудие');
 	A_CastForTarget('Экзорцизм');
