@@ -70,19 +70,19 @@ function Interrupt(spell)
 	
 	if not UnitExists("focus") or not UnitCanAttack("player","focus") then		
 		if UnitCastingInfo("target") and select(9,UnitCastingInfo("target")) == false then
-			if not tableContains(interruptBlacklist[UnitName("target")],UnitCastingInfo("target")) and IsSpellInRange(spell,"target") then Cast(spell) else return end;
+			if IsSpellInRange(spell,"target") then Cast(spell) else return end;
 		end
 		
 		if UnitChannelInfo("target") and select(8,UnitChannelInfo("target")) == false then
-			if not tableContains(interruptBlacklist[UnitName("target")],UnitChannelInfo("target")) and IsSpellInRange(spell,"target") then Cast(spell) else return end;
+			if IsSpellInRange(spell,"target") then Cast(spell) else return end;
 		end
 	else
 		if UnitCastingInfo("focus") and select(9,UnitCastingInfo("focus")) == false then
-			if not tableContains(interruptBlacklist[UnitName("focus")],UnitCastingInfo("focus")) and IsSpellInRange(spell,"focus") then CastTarget(spell,"focus") else return end;
+			if IsSpellInRange(spell,"focus") then CastTarget(spell,"focus") else return end;
 		end
 		
 		if UnitChannelInfo("focus") and select(8,UnitChannelInfo("focus")) == false then
-			if not tableContains(interruptBlacklist[UnitName("focus")],UnitChannelInfo("focus")) and IsSpellInRange(spell,"focus") then CastTarget(spell,"focus") else return end;
+			if IsSpellInRange(spell,"focus") then CastTarget(spell,"focus") else return end;
 		end
 	end
 end
@@ -282,6 +282,7 @@ function Attack_2() -- Ретрик (bulid 4 Глориан)
 	-- 3. "/script DelTimeout('AutoCombo')" - Макрос для выключение автоматического режима боя.
 	-- ~~~~~~~~~~~~~~~~~
 	Interrupt('Укор');
+	if A_IsCasting('target') then A_CastForTarget('Кулак Правосудия'); end
 	Interrupt('Кулак правосудия');
 	if A_GetStackBuff("Самоотверженный целитель") == 3 then A_CastForTarget('Вспышка света'); end
 	A_CastForTarget('Удар воина Света');
