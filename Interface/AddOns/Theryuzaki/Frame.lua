@@ -4,7 +4,9 @@ local player_hp = '';
 local player_mana = '';
 local rog_combo = 0;
 local Tick = {};
-local holyPower = UnitPower('player',9);
+local function pal_power()
+	return UnitPower("player",9);
+end
 
 print('Hallo to TheRyuzaki Addon');
 
@@ -87,7 +89,6 @@ function ChekData()
 	player_hp = UnitHealth('player') / (UnitHealthMax('player') / 100);
 	player_mana = UnitMana('player') / (UnitManaMax('player') / 100);
 	rog_combo = GetComboPoints('target');
-	holyPower = UnitPower('player',9);
 end
 local Cron = {};
 local tmp_Cron = {};
@@ -168,7 +169,7 @@ function Attack_1() -- ФростДК (bulid 1)
 	A_CastForTarget('Вытягивание чумы');
 end
 
-function Attack_2() -- Ретрик (bulid 1 Глориан)
+function Attack_2() -- Ретрик (bulid 2 Глориан)
 	-- ~~~~Макросы~~~~~
 	-- 1. "/script A_Atack(2)" - Макрос для атаки вручную о при нажатии на него.
 	-- 2. "/script AutoCombo(2)" - Макрос включения автоматического режима боя.
@@ -177,14 +178,18 @@ function Attack_2() -- Ретрик (bulid 1 Глориан)
 	A_CastForTarget('Удар воина Света');
 	A_CastForTarget('Правосудие');
 	A_CastForTarget('Экзорцизм');
-	A_CastForTarget('Божественная призма');
-	A_CastForTarget('Защитник древних королей');
+	A_CastForTarget('Смертный приговор');
 	A_CastForTarget('Укор');
-	A_CastForTarget('Гнев Карателя');
-	if (A_IsBuf('Гнев Карателя')) then A_CastForTarget('Молот Гнева'); end
-	if (target_hp <= 20) then A_CastForTarget('Молот Гнева'); end
-	--if (holyPower => 3) then A_CastForTarget('Вердикт храмовника'); end
-	--if ((UnitPower('player',9)) => 3) then A_CastForTarget('Вердикт храмовника'); end
+	A_CastForTarget('Гнев карателя');
+	if (A_IsBuf('Гнев карателя')) then A_CastForTarget('Молот гнева'); end
+	if (target_hp <= 20) then A_CastForTarget('Молот гнева'); end
+	if (player_hp <= 80) then A_CastForTarget('Божественная защита'); end
+	if (player_hp <= 50) then A_CastForTarget('Божественный щит'); end
+	if (player_hp <= 15) then A_CastForTarget('Возложение рук'); end
+	if (player_hp <= 50) and pal_power() >= 3 then A_CastForTarget('Торжество'); end
+	if not A_IsBuf('Дознание') and pal_power() >= 3 then  A_CastForTarget('Дознание'); end
+	if pal_power() >= 3 and A_IsBuf('Дознание') then A_CastForTarget('Вердикт храмовника'); end
+	if (A_IsBuf('Дознание')) then A_CastForTarget('Защитник древних королей'); end
 	end
 
 local A3_ManaFull = true;
@@ -197,17 +202,16 @@ function Attack_3() -- БМ Хант (bulid 1) (by sher)
 	if (A_IsBuf('Дух ястреба') or A_IsBuf('Дух железного ястреба')) then else A_CastForTarget('Дух железного ястреба'); A_CastForTarget('Дух ястреба'); end
 	if (A_IsCasting()) then return true; end
 	if (player_mana > 95) then A3_ManaFull = true; end
-	if ((UnitMana('player') < 10 and A_IsBuf('Охотничий азарт')) or (UnitMana('player') < 30)) then A_CastForTarget('Быстрая стрельба');  A3_ManaFull = false;  end
 	A_CastForTarget('Звериный гнев');
 	A_CastForTarget('Звериный натиск');
 	A_CastForTarget('Команда "Взять!"');
 	if (target_hp <= 20) then A_CastForTarget('Убийственный выстрел'); end
 	if (A_IsDeBuf('Укус змеи', 'target', true)) then else A_CastForTarget('Укус змеи'); end
 	A_CastForTarget('Шквал');
-	if (A_IsBuf('Охотничий азарт')) then 
+	if (A_IsBuf('Охотничий азарт') and A3_ManaFull) then 
 		if (A_IsBuf('Удар зверя', 'pet')) then A_CastForTarget('Чародейский выстрел'); else A_CastForTarget('Залп'); end 
 	end
-	
+	if ((UnitMana('player') < 10 and A_IsBuf('Охотничий азарт')) or (UnitMana('player') < 30)) then A_CastForTarget('Быстрая стрельба');  A3_ManaFull = false;  end
 	if (A3_ManaFull) then
 		if ((A_IsBuf('Охотничий азарт') and player_mana >= 10) or player_mana >= 30) then A_CastForTarget('Чародейский выстрел'); end
 	else
