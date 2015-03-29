@@ -15,6 +15,13 @@ function SlashCmdList.TR(msg, editbox)
 	print("I work!");
 end
 
+-- Получаем количество стаков баффа --
+function buff_num(buff)
+	local name,_,_,count = UnitBuff("player",buff);
+	if not name then return 0 end
+	return count
+end
+
 function A_CastForTarget(name, target)
 	if (target == 'player') then TargetUnit('player'); end
 	Cooldown = GetSpellCooldown(name);
@@ -169,12 +176,13 @@ function Attack_1() -- ФростДК (bulid 1)
 	A_CastForTarget('Вытягивание чумы');
 end
 
-function Attack_2() -- Ретрик (bulid 2 Глориан)
+function Attack_2() -- Ретрик (bulid 3 Глориан)
 	-- ~~~~Макросы~~~~~
 	-- 1. "/script A_Atack(2)" - Макрос для атаки вручную о при нажатии на него.
 	-- 2. "/script AutoCombo(2)" - Макрос включения автоматического режима боя.
 	-- 3. "/script DelTimeout('AutoCombo')" - Макрос для выключение автоматического режима боя.
 	-- ~~~~~~~~~~~~~~~~~
+	if buff_num("Самоотверженный целитель") == 3 then A_CastForTarget('Вспышка света'); end
 	A_CastForTarget('Удар воина Света');
 	A_CastForTarget('Правосудие');
 	A_CastForTarget('Экзорцизм');
