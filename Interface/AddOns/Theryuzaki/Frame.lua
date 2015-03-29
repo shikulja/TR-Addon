@@ -3,6 +3,7 @@ local target_mana = '';
 local player_hp = '';
 local player_mana = '';
 local rog_combo = 0;
+local pal_power = 0;
 local Tick = {};
 local function pal_power()
 	return UnitPower("player",9);
@@ -13,6 +14,17 @@ print('Hallo to TheRyuzaki Addon');
 SLASH_TR1 = '/tr'; 
 function SlashCmdList.TR(msg, editbox) 
 	print("I work!");
+end
+
+function A_GetCollDown(name)
+	local start, duration, enabled = GetSpellCooldown(name);
+	if enabled == 0 then
+		return -1;
+	elseif ( start > 0 and duration > 0) then
+		return (start + duration - GetTime());
+	else
+		return 0;
+	end
 end
 
 ---------------------
@@ -75,11 +87,30 @@ function Interrupt(spell)
 	end
 end
 
--- Получаем количество стаков баффа --
-function buff_num(buff)
-	local name,_,_,count = UnitBuff("player",buff);
-	if not name then return 0 end
-	return count
+function A_GetStackBuff(name, target, my)
+	if not target then target = 'player'; end
+	for i=1,40 do 
+		local D, arg2, arg3, count, arg5, arg6, arg7, arg8, arg9, arg10 = UnitBuff(target,i);
+		if (D and D == name) then
+			if ((arg8 == 'player' and my) or not my) then
+				return count;
+			end
+		end 
+	end
+	return 0;
+end
+
+function A_GetStackDeBuff(name, target, my)
+	if not target then target = 'player'; end
+	for i=1,40 do 
+		local D, arg2, arg3, count, arg5, arg6, arg7, arg8, arg9, arg10 = UnitDebuff(target,i);
+		if (D and D == name) then
+			if ((arg8 == 'player' and my) or not my) then
+				return count;
+			end
+		end 
+	end
+	return 0;
 end
 
 function A_CastForTarget(name, target)
@@ -216,24 +247,32 @@ end
 
 
 
-function Attack_1() -- ФростДК (bulid 1)
+function Attack_1() -- ФростДК (bulid 3)
 	-- ~~~~Макросы~~~~~
 	-- 1. "/script A_Atack(1)" - Макрос для атаки вручную о при нажатии на него.
 	-- 2. "/script AutoCombo(1)" - Макрос включения автоматического режима боя.
 	-- 3. "/script DelTimeout('AutoCombo')" - Макрос для выключение автоматического режима боя.
 	-- ~~~~~~~~~~~~~~~~~
-	if (target_hp <= 35) then A_CastForTarget('Жнец душ'); end -- Жнец душ если хп у противника меньше или ровно 35%
-	if (A_IsBuf('Машина для убийств')) then A_CastForTarget('Уничтожение'); end -- Уничтожение если баф машина для убийств
-	if (A_IsBuf('Машина для убийств') and player_mana >= 20) then A_CastForTarget('Ледяной удар'); end -- Ледяной удар если баф машина для убийств и маны 20+
-	A_CastForTarget('Вспышка болезни'); -- Вспышка болезни по кд
-	A_CastForTarget('Усиление рунического оружия'); -- Усиление рунического оружия по кд
-	A_CastForTarget('Ледяной столп'); -- Ледяной столп по кд
-	if (player_mana >= 80) then A_CastForTarget('Ледяной удар'); end -- Ледяной удар если маны 20+
-	A_CastForTarget('Воющий ветер');
-	if (player_mana >= 20) then A_CastForTarget('Ледяной удар'); end -- Ледяной удар если маны 20+
-	A_CastForTarget('Зимний горн');
-	A_CastForTarget('Удар чумы');
-	A_CastForTarget('Вытягивание чумы');
+	A_CastForTarget('Ледяной столп'); -- В первую очередь если не в КД то юзаем Ледяной столп
+	if (target_hp <= 35) then 
+		A_CastForTarget('Жнец душ');  -- если у противника мение или ровно 35% здаровья то юзаем Жнец душ
+	end	
+	if (A_IsDeBuf('Кровавая чума', 'target', true)) then 
+		A_CastForTarget('Уничтожение'); -- Если на противнике есть кровавая чума то пытаемся юзать Уничтожение
+	else
+		A_CastForTarget('Вспышка болезни'); -- Если на противнике нету Кровавой чумы то пытаемся вешать сначало Вспышка болезни
+		A_CastForTarget('Нечестивая порча'); -- Если на противнике нету Кровавой чумы и не сработала Вспышка болезни то юзаем Нечестивая порча
+		A_CastForTarget('Мор'); -- Если на противнике нету Кровавой чумы и не сработала Вспышка болезни и нету Нечестивая порча то используем МОР
+	end
+	if (A_IsBuf('Морозная дымка') and A_IsBuf('Машина для убийств') == false) then
+		A_CastForTarget('Воющий ветер'); -- если есть морозная дымка и и нету машины для убийств то юзаем воющий ветер
+	end
+	
+	A_CastForTarget('Ледяной удар'); -- Если выше действия пропущены то пытаемся использовать Ледяной удар
+	A_CastForTarget('Воющий ветер'); -- Если нету на ледяной удар рун то используем Воющий ветер
+	A_CastForTarget('Усиление рунического оружия'); -- Если все руны КД и нету рунической силы то пытаемся использовать Усиление рунического оружия
+	A_CastForTarget('Зимний горн'); -- Если мало рунической энергии то используем Зимний горн(+20 к энергии)
+	A_CastForTarget('Удар чумы'); -- Если вобще не чо нет то пытаемся использовать руны нечестивости с помощью Удар чумы
 end
 
 function Attack_2() -- Ретрик (bulid 4 Глориан)
@@ -241,17 +280,14 @@ function Attack_2() -- Ретрик (bulid 4 Глориан)
 	-- 1. "/script A_Atack(2)" - Макрос для атаки вручную о при нажатии на него.
 	-- 2. "/script AutoCombo(2)" - Макрос включения автоматического режима боя.
 	-- 3. "/script DelTimeout('AutoCombo')" - Макрос для выключение автоматического режима боя.
-	--Необходимые таланты:
-	--Самоотверженный целитель, Смертный приговор.
 	-- ~~~~~~~~~~~~~~~~~
 	Interrupt('Укор');
-	Interrupt('Кулак правосудия'); -- не работает над разбиратся мб атака на дистанции
-	if (target_hp >= 95) and buff_num("Самоотверженный целитель") == 3 then A_CastForTarget('Вспышка света'); end
+	Interrupt('Кулак правосудия');
+	if A_GetStackBuff("Самоотверженный целитель") == 3 then A_CastForTarget('Вспышка света'); end
 	A_CastForTarget('Удар воина Света');
 	A_CastForTarget('Правосудие');
 	A_CastForTarget('Экзорцизм');
 	A_CastForTarget('Смертный приговор');
-	A_CastForTarget('Укор');
 	A_CastForTarget('Гнев карателя');
 	if (A_IsBuf('Гнев карателя')) then A_CastForTarget('Молот гнева'); end
 	if (target_hp <= 20) then A_CastForTarget('Молот гнева'); end
@@ -263,6 +299,7 @@ function Attack_2() -- Ретрик (bulid 4 Глориан)
 	if pal_power() >= 3 and A_IsBuf('Дознание') then A_CastForTarget('Вердикт храмовника'); end
 	if (A_IsBuf('Дознание')) then A_CastForTarget('Защитник древних королей'); end
 	end
+
 
 local A3_ManaFull = true;
 function Attack_3() -- БМ Хант (bulid 1) (by sher)
@@ -288,5 +325,34 @@ function Attack_3() -- БМ Хант (bulid 1) (by sher)
 		if ((A_IsBuf('Охотничий азарт') and player_mana >= 10) or player_mana >= 30) then A_CastForTarget('Чародейский выстрел'); end
 	else
 		A_CastForTarget('Выстрел кобры');
+	end
+end
+
+
+function Interval_DefinesDK()
+	SetTimeout('Interval_DefinesDK',0.5);
+	DefinesDK();
+end
+function DefinesDK() -- БлудДК (bulid 3)
+	-- ~~~~Макросы~~~~~
+	-- 1. "/script Interval_DefinesDK()" - Макрос для атаки вручную о при нажатии на него.
+	-- ~~~~~~~~~~~~~~~~~
+	if (player_hp <= 90) then 
+		A_CastForTarget('Захват рун'); 
+	end
+	if (player_hp <= 85) then 
+		A_CastForTarget('Костяной щит');
+	end
+	if (player_hp <= 50) then 
+		A_CastForTarget('Воскрешение мертвых'); 
+		A_CastForTarget('Смертельный союз'); 
+		A_CastForTarget('Кровь вампира');
+	end
+	if (player_hp <= 30) then 
+		A_CastForTarget('Незыблемость льда'); 
+		A_CastForTarget('Антимагический панцирь'); 
+	end
+	if (A_IsBuf('Зимний горн')) then
+		A_CastForTarget('Зимний горн'); 
 	end
 end
