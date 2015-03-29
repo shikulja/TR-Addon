@@ -13,6 +13,13 @@ function SlashCmdList.TR(msg, editbox)
 	print("I work!");
 end
 
+-- Получаем количество стаков баффа --
+function buff_num(buff)
+	local name,_,_,count = UnitBuff("player",buff);
+	if not name then return 0 end
+	return count
+end
+
 function A_CastForTarget(name, target)
 	if (target == 'player') then TargetUnit('player'); end
 	Cooldown = GetSpellCooldown(name);
