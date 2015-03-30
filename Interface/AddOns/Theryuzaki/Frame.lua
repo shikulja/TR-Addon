@@ -10,6 +10,11 @@ local function pal_power()
 end
 
 print('Hallo to TheRyuzaki Addon');
+local playerClass, englishClass = UnitClass("player");
+local currentSpec = GetSpecialization()
+local currentSpecName = currentSpec and select(2, GetSpecializationInfo(currentSpec)) or "None"
+print('Your player is a : ' .. playerClass .. '; ' .. englishClass .. '.');
+print("Your current spec:", currentSpecName)
 
 SLASH_TR1 = '/tr'; 
 function SlashCmdList.TR(msg, editbox) 
@@ -24,66 +29,6 @@ function A_GetCollDown(name)
 		return (start + duration - GetTime());
 	else
 		return 0;
-	end
-end
-
----------------------
---Функции заклинаний-
----------------------
-
---Кастовать заклинание. Возвращать true если скастовался, false если нет
-function Cast(spell)
-	local usable,mana = IsUsableSpell(spell)
-	
-	if usable and mana == nil then
-		if GetSpellCooldown(spell) == 0 then
-			CastSpellByName(spell)
-			return true;
-		else
-			return false;
-		end
-	else
-		return false;
-	end
-end
-
---Кастовать заклинание по цели. Возвращать true если скастовался, false если нет
-function CastTarget(spell,target)
-	local usable,mana = IsUsableSpell(spell)
-	
-	if usable and mana == nil then
-		if GetSpellCooldown(spell) == 0 and IsSpellInRange(spell,target) == 1 then
-			CastSpellByName(spell,target)
-			return true;
-		else
-			return false;
-		end
-	else
-		return false;
-	end
-end
-
--- Функция прерывания (кастует чтобы прервать)
--- Фокус > Цель
-function Interrupt(spell)
-	if not IsUsableSpell(spell) then return end;
-	
-	if not UnitExists("focus") or not UnitCanAttack("player","focus") then		
-		if UnitCastingInfo("target") and select(9,UnitCastingInfo("target")) == false then
-			if IsSpellInRange(spell,"target") then Cast(spell) else return end;
-		end
-		
-		if UnitChannelInfo("target") and select(8,UnitChannelInfo("target")) == false then
-			if IsSpellInRange(spell,"target") then Cast(spell) else return end;
-		end
-	else
-		if UnitCastingInfo("focus") and select(9,UnitCastingInfo("focus")) == false then
-			if IsSpellInRange(spell,"focus") then CastTarget(spell,"focus") else return end;
-		end
-		
-		if UnitChannelInfo("focus") and select(8,UnitChannelInfo("focus")) == false then
-			if IsSpellInRange(spell,"focus") then CastTarget(spell,"focus") else return end;
-		end
 	end
 end
 
@@ -275,15 +220,14 @@ function Attack_1() -- ФростДК (bulid 3)
 	A_CastForTarget('Удар чумы'); -- Если вобще не чо нет то пытаемся использовать руны нечестивости с помощью Удар чумы
 end
 
-function Attack_2() -- Ретрик (bulid 4 Глориан)
+function Attack_2() -- Ретрик (bulid 5 Глориан)
 	-- ~~~~Макросы~~~~~
 	-- 1. "/script A_Atack(2)" - Макрос для атаки вручную о при нажатии на него.
 	-- 2. "/script AutoCombo(2)" - Макрос включения автоматического режима боя.
 	-- 3. "/script DelTimeout('AutoCombo')" - Макрос для выключение автоматического режима боя.
 	-- ~~~~~~~~~~~~~~~~~
-	Interrupt('Укор');
-	if A_IsCasting('target') then A_CastForTarget('Кулак Правосудия'); end
-	Interrupt('Кулак правосудия');
+	if A_IsCasting(nil, 'target') then A_CastForTarget('Кулак Правосудия'); A_CastForTarget('Укор'); end
+	if IsMounted() then A_CastForTarget('Кулак Правосудия'); end
 	if A_GetStackBuff("Самоотверженный целитель") == 3 then A_CastForTarget('Вспышка света'); end
 	A_CastForTarget('Удар воина Света');
 	A_CastForTarget('Правосудие');
@@ -295,11 +239,11 @@ function Attack_2() -- Ретрик (bulid 4 Глориан)
 	if (player_hp <= 80) then A_CastForTarget('Божественная защита'); end
 	if (player_hp <= 50) then A_CastForTarget('Божественный щит'); end
 	if (player_hp <= 15) then A_CastForTarget('Возложение рук'); end
-	if (player_hp <= 50) and pal_power() >= 3 then A_CastForTarget('Торжество'); end
+	if (player_hp <= 60) and pal_power() >= 3 then A_CastForTarget('Торжество'); end
 	if not A_IsBuf('Дознание') and pal_power() >= 3 then  A_CastForTarget('Дознание'); end
 	if pal_power() >= 3 and A_IsBuf('Дознание') then A_CastForTarget('Вердикт храмовника'); end
 	if (A_IsBuf('Дознание')) then A_CastForTarget('Защитник древних королей'); end
-	end
+end
 
 
 local A3_ManaFull = true;
