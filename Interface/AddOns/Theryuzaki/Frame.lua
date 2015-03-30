@@ -301,3 +301,24 @@ function DefinesDK() -- БлудДК (bulid 3)
 		A_CastForTarget('Зимний горн'); 
 	end
 end
+
+	-- counts the number of party members having a significant health loss
+		local unitsBelow70 = 0
+		local unitsBelow50 = 0
+		local unitsBelow30 = 0
+		for unit,index in pairs(jps.RaidStatus) do
+			--Only check the relevant units
+			if (index["inrange"] == true) then
+				local thisHP = jps.hp(unit)
+				-- Number of people below x%
+				if thisHP < 0.3 then unitsBelow30 = unitsBelow30 + 1 end
+				if thisHP < 0.5 then unitsBelow50 = unitsBelow50 + 1 end
+				if thisHP < 0.7 then unitsBelow70 = unitsBelow70 + 1 end
+			end
+	end
+	
+-- aoe heal
+		{ "Circle of Healing", unitsBelow70  > 3, Priest_Target },
+		{ "Circle of Healing", unitsBelow70  > 3, "player" },
+		{ "Prayer of Healing", unitsBelow50  > 3, "player" },
+		{ "Prayer of Healing", unitsBelow50  > 3, Priest_Target },	
